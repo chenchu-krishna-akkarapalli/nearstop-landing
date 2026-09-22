@@ -41,7 +41,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 24px;
-      padding: 32px 24px;
+      padding: 30px 22px;
       text-align: center;
       box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
       position: relative;
@@ -69,21 +69,21 @@
       font-weight: 600;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     .icon {
-      width: 68px;
-      height: 68px;
-      border-radius: 20px;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
       background: rgba(37, 99, 235, 0.12);
       border: 1px solid rgba(37, 99, 235, 0.25);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
     h1 {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
       margin-bottom: 8px;
@@ -92,7 +92,7 @@
     p.sub {
       font-size: 14px;
       color: var(--text-dim);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       line-height: 1.4;
     }
     .trip-card {
@@ -101,25 +101,28 @@
       border-radius: 16px;
       padding: 16px;
       text-align: left;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       display: none;
     }
     .trip-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
       margin-bottom: 8px;
     }
     .trip-dest {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: #FFF;
-      line-height: 1.3;
+      line-height: 1.35;
+      flex: 1;
     }
     .trip-subtitle {
       font-size: 12px;
       color: var(--text-dim);
-      margin-top: 2px;
+      margin-top: 4px;
+      line-height: 1.4;
     }
     .radius-pill {
       font-size: 11px;
@@ -129,6 +132,7 @@
       padding: 4px 10px;
       border-radius: 9999px;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .trip-note {
       background: rgba(245, 158, 11, 0.12);
@@ -155,6 +159,8 @@
       border-radius: 14px;
       margin-bottom: 12px;
       box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      cursor: pointer;
+      border: none;
       transition: background 0.15s, transform 0.15s;
     }
     .btn:hover {
@@ -163,86 +169,39 @@
     .btn:active {
       transform: scale(0.98);
     }
-    .btn-subtle {
-      background: rgba(255, 255, 255, 0.05);
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
       border: 1px solid var(--border);
-      color: var(--text-dim);
+      color: #F1F5F9;
       font-size: 13px;
       padding: 12px;
       box-shadow: none;
     }
-    .btn-subtle:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: #FFF;
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .helper-box {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 14px;
+      text-align: left;
+      font-size: 12px;
+      color: #FCA5A5;
+      line-height: 1.45;
     }
     .footer {
       font-size: 12px;
       color: var(--text-dim);
-      margin-top: 20px;
+      margin-top: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
     }
   </style>
-  <script>
-    function decodeBase64Url(str) {
-      try {
-        let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-        while (base64.length % 4 !== 0) base64 += '=';
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        return JSON.parse(new TextDecoder().decode(bytes));
-      } catch (e) {
-        return null;
-      }
-    }
-
-    (function() {
-      const search = window.location.search;
-      const params = new URLSearchParams(search);
-      const token = params.get('d');
-      const targetScheme = 'nearstop://alarm/share' + search;
-
-      // Auto-redirect if launched on mobile
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        window.location.href = targetScheme;
-      }
-
-      window.addEventListener('DOMContentLoaded', function() {
-        const openBtn = document.getElementById('open-btn');
-        if (openBtn) openBtn.href = targetScheme;
-
-        if (token) {
-          const payload = decodeBase64Url(token);
-          if (payload && payload.dest) {
-            const tripCard = document.getElementById('trip-card');
-            const destLabel = document.getElementById('dest-label');
-            const destSub = document.getElementById('dest-sub');
-            const radiusBadge = document.getElementById('radius-badge');
-            const senderTag = document.getElementById('sender-tag');
-            const tripNote = document.getElementById('trip-note');
-
-            if (destLabel) destLabel.textContent = payload.dest.label;
-            if (destSub) destSub.textContent = payload.dest.subtitle || 'Transit Geofence';
-            if (radiusBadge) {
-              const km = (payload.dest.radius / 1000).toFixed(payload.dest.radius % 1000 === 0 ? 0 : 1);
-              radiusBadge.textContent = km + ' KM WAKE';
-            }
-            if (payload.sender && senderTag) {
-              senderTag.textContent = payload.sender + ' shared an alarm';
-            }
-            if (payload.note && tripNote) {
-              tripNote.style.display = 'block';
-              tripNote.textContent = '“' + payload.note + '”';
-            }
-            if (tripCard) tripCard.style.display = 'block';
-          }
-        }
-      });
-    })();
-  </script>
 </head>
 <body>
   <div class="container">
@@ -259,33 +218,127 @@
       <h1>Open in NearStop</h1>
       <p class="sub">GPS-powered commute alarm that wakes you up right before your destination stop.</p>
 
-      <!-- Decoded Trip Preview Card -->
+      <!-- Decoded Destination Card -->
       <div id="trip-card" class="trip-card">
         <div class="trip-header">
           <div class="trip-dest" id="dest-label">Destination Stop</div>
-          <div class="radius-pill" id="radius-badge">WAKE ZONE</div>
+          <div class="radius-pill" id="radius-badge">500 M WAKE</div>
         </div>
         <div class="trip-subtitle" id="dest-sub">Active transit route</div>
         <div id="trip-note" class="trip-note" style="display:none;"></div>
       </div>
 
-      <a id="open-btn" href="nearstop://alarm/share" class="btn">
+      <!-- Primary Action: Android Intent + Universal Scheme Launcher -->
+      <button id="open-btn" class="btn" onclick="launchApp()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
           <polyline points="15 3 21 3 21 9"></polyline>
           <line x1="10" y1="14" x2="21" y2="3"></line>
         </svg>
         Open in NearStop App
+      </button>
+
+      <!-- Fallback Direct App Scheme -->
+      <a id="direct-scheme-btn" href="nearstop://alarm/share" class="btn btn-secondary">
+        Direct App Scheme (nearstop://)
       </a>
 
-      <a href="https://github.com/chenchu-krishna-akkarapalli/destination-alarm" class="btn btn-subtle">
-        Get NearStop App
-      </a>
+      <!-- Helper Notice if App Didn't Launch -->
+      <div id="helper-box" class="helper-box">
+        <strong>App didn't open?</strong>
+        <div style="margin-top: 4px;">
+          1. Make sure you have installed the latest NearStop build on your phone (with <code>nearstop://</code> intent filter enabled).<br>
+          2. If running locally via USB/Expo, run <code>npm run android</code> to register the scheme on your device.
+        </div>
+      </div>
 
       <div class="footer">
         🔒 Zero Involuntary Tracking · Privacy Protected
       </div>
     </div>
   </div>
+
+  <script>
+    function decodeBase64Url(str) {
+      try {
+        let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4 !== 0) base64 += '=';
+        // UTF-8 safe browser decoding
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+      } catch (e) {
+        try {
+          return JSON.parse(decodeURIComponent(escape(atob(base64))));
+        } catch (e2) {
+          return null;
+        }
+      }
+    }
+
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const token = params.get('d');
+    const customSchemeUrl = 'nearstop://alarm/share' + search;
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    // Android Intent format recognized by Chrome on Android
+    const androidIntentUrl = 'intent://alarm/share' + search + '#Intent;scheme=nearstop;package=com.nearstop;end';
+
+    // Populate UI on load without blocking rendering
+    document.addEventListener('DOMContentLoaded', function() {
+      const directBtn = document.getElementById('direct-scheme-btn');
+      if (directBtn) directBtn.href = customSchemeUrl;
+
+      if (token) {
+        const payload = decodeBase64Url(token);
+        if (payload && payload.dest) {
+          const tripCard = document.getElementById('trip-card');
+          const destLabel = document.getElementById('dest-label');
+          const destSub = document.getElementById('dest-sub');
+          const radiusBadge = document.getElementById('radius-badge');
+          const senderTag = document.getElementById('sender-tag');
+          const tripNote = document.getElementById('trip-note');
+
+          if (destLabel) destLabel.textContent = payload.dest.label;
+          if (destSub) destSub.textContent = payload.dest.subtitle || 'Active transit destination';
+          if (radiusBadge) {
+            const km = payload.dest.radius >= 1000 
+              ? (payload.dest.radius / 1000).toFixed(payload.dest.radius % 1000 === 0 ? 0 : 1) + ' KM' 
+              : payload.dest.radius + ' M';
+            radiusBadge.textContent = km + ' WAKE';
+          }
+          if (payload.sender && senderTag) {
+            senderTag.textContent = payload.sender + ' shared an alarm';
+          }
+          if (payload.note && tripNote) {
+            tripNote.style.display = 'block';
+            tripNote.textContent = '“' + payload.note + '”';
+          }
+          if (tripCard) tripCard.style.display = 'block';
+        }
+      }
+    });
+
+    function launchApp() {
+      const helper = document.getElementById('helper-box');
+      
+      if (isAndroid) {
+        // Use Chrome Android Intent
+        window.location.href = androidIntentUrl;
+      } else {
+        // iOS or desktop
+        window.location.href = customSchemeUrl;
+      }
+
+      // If user is still on this browser tab after 2 seconds, show the helper instructions
+      setTimeout(function() {
+        if (helper) {
+          helper.style.display = 'block';
+        }
+      }, 2000);
+    }
+  </script>
 </body>
 </html>
