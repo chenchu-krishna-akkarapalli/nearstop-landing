@@ -235,12 +235,21 @@
           <polyline points="15 3 21 3 21 9"></polyline>
           <line x1="10" y1="14" x2="21" y2="3"></line>
         </svg>
-        Open in NearStop App
+        Open Alarm in NearStop App
       </button>
+
+      <!-- Direct Installed APK Launcher (Works with ANY installed NearStop build) -->
+      <a id="package-btn" href="intent:#Intent;package=com.nearstop;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end" class="btn" style="background: #059669;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+        Launch Installed App Directly
+      </a>
 
       <!-- Fallback Direct App Scheme -->
       <a id="direct-scheme-btn" href="nearstop://alarm/share" class="btn btn-secondary">
-        Direct App Scheme (nearstop://)
+        Direct Custom Scheme (nearstop://)
       </a>
 
       <!-- Helper Notice if App Didn't Launch -->
@@ -325,19 +334,24 @@
       const helper = document.getElementById('helper-box');
       
       if (isAndroid) {
-        // Use Chrome Android Intent
+        // 1. Try launching with the specific alarm share intent
         window.location.href = androidIntentUrl;
+
+        // 2. If the installed APK does not have the custom scheme registered, fallback to launching the APK directly by package
+        setTimeout(function() {
+          window.location.href = 'intent:#Intent;package=com.nearstop;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end';
+        }, 500);
       } else {
         // iOS or desktop
         window.location.href = customSchemeUrl;
       }
 
-      // If user is still on this browser tab after 2 seconds, show the helper instructions
+      // If user is still on this browser tab after 2.5 seconds, show the helper instructions
       setTimeout(function() {
         if (helper) {
           helper.style.display = 'block';
         }
-      }, 2000);
+      }, 2500);
     }
   </script>
 </body>
