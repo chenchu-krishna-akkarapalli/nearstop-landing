@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.nearstop",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7F:0F:70:93:B4:43:97:DF:77:AA:7A:B2:7A:C3:AE:34:64:99:99:A5:68:55:09:A6:6F:A5:98:A2:3E"
+      ]
+    }
+  }
+]

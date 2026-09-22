@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NearStop - Shared Location Alarm</title>
+  <meta name="description" content="NearStop destination-based GPS commute alarm.">
+  <style>
+    :root {
+      --bg: #090D16;
+      --card: #111827;
+      --card-inner: #1F2937;
+      --accent: #2563EB;
+      --accent-hover: #1D4ED8;
+      --text: #F8FAFC;
+      --text-dim: #94A3B8;
+      --green: #10B981;
+      --green-bg: rgba(16, 185, 129, 0.12);
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .container {
+      max-width: 440px;
+      width: 100%;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 99, 235, 0.35);
+      color: #60A5FA;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 20px;
+      background: rgba(37, 99, 235, 0.12);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+    p.sub {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+    .trip-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .trip-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .trip-dest {
+      font-size: 16px;
+      font-weight: 700;
+      color: #FFF;
+      line-height: 1.3;
+    }
+    .trip-subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .radius-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      background: var(--green-bg);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+    .trip-note {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #FCD34D;
+      font-size: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: var(--accent);
+      color: #FFF;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 15px 20px;
+      border-radius: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+      transition: background 0.15s, transform 0.15s;
+    }
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-subtle {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 13px;
+      padding: 12px;
+      box-shadow: none;
+    }
+    .btn-subtle:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFF;
+    }
+    .footer {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+  </style>
+  <script>
+    function decodeBase64Url(str) {
+      try {
+        let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+        while (base64.length % 4 !== 0) base64 += '=';
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    (function() {
+      const search = window.location.search;
+      const params = new URLSearchParams(search);
+      const token = params.get('d');
+      const targetScheme = 'nearstop://alarm/share' + search;
+
+      // Auto-redirect if launched on mobile
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        window.location.href = targetScheme;
+      }
+
+      window.addEventListener('DOMContentLoaded', function() {
+        const openBtn = document.getElementById('open-btn');
+        if (openBtn) openBtn.href = targetScheme;
+
+        if (token) {
+          const payload = decodeBase64Url(token);
+          if (payload && payload.dest) {
+            const tripCard = document.getElementById('trip-card');
+            const destLabel = document.getElementById('dest-label');
+            const destSub = document.getElementById('dest-sub');
+            const radiusBadge = document.getElementById('radius-badge');
+            const senderTag = document.getElementById('sender-tag');
+            const tripNote = document.getElementById('trip-note');
+
+            if (destLabel) destLabel.textContent = payload.dest.label;
+            if (destSub) destSub.textContent = payload.dest.subtitle || 'Transit Geofence';
+            if (radiusBadge) {
+              const km = (payload.dest.radius / 1000).toFixed(payload.dest.radius % 1000 === 0 ? 0 : 1);
+              radiusBadge.textContent = km + ' KM WAKE';
+            }
+            if (payload.sender && senderTag) {
+              senderTag.textContent = payload.sender + ' shared an alarm';
+            }
+            if (payload.note && tripNote) {
+              tripNote.style.display = 'block';
+              tripNote.textContent = '“' + payload.note + '”';
+            }
+            if (tripCard) tripCard.style.display = 'block';
+          }
+        }
+      });
+    })();
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div id="sender-tag" class="badge">NearStop Location Alarm</div>
+
+      <div class="icon">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+          <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+        </svg>
+      </div>
+
+      <h1>Open in NearStop</h1>
+      <p class="sub">GPS-powered commute alarm that wakes you up right before your destination stop.</p>
+
+      <!-- Decoded Trip Preview Card -->
+      <div id="trip-card" class="trip-card">
+        <div class="trip-header">
+          <div class="trip-dest" id="dest-label">Destination Stop</div>
+          <div class="radius-pill" id="radius-badge">WAKE ZONE</div>
+        </div>
+        <div class="trip-subtitle" id="dest-sub">Active transit route</div>
+        <div id="trip-note" class="trip-note" style="display:none;"></div>
+      </div>
+
+      <a id="open-btn" href="nearstop://alarm/share" class="btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+        Open in NearStop App
+      </a>
+
+      <a href="https://github.com/chenchu-krishna-akkarapalli/destination-alarm" class="btn btn-subtle">
+        Get NearStop App
+      </a>
+
+      <div class="footer">
+        🔒 Zero Involuntary Tracking · Privacy Protected
+      </div>
+    </div>
+  </div>
+</body>
+</html>
